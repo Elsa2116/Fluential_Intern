@@ -101,7 +101,7 @@ export default function RootLayout({ children }) {
               </div>
             </div>
             <div className="mx-auto mt-6 w-full max-w-7xl border-t border-slate-200 pt-4 text-xs text-slate-400">
-              <p>Fluent by Fluential Internship Programme · Round 1 Task 3</p>
+              <p>Fluent by Fluential Internship Programme · Round 1</p>
             </div>
           </footer>
         </div>
