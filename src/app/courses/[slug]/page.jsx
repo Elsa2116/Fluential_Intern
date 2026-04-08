@@ -1,20 +1,78 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { courses, getCourse } from "@/data/courses";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
-export function generateStaticParams() {
-  return courses.map((course) => ({ slug: course.slug }));
-}
+export default function CourseDetailPage() {
+  const routeParams = useParams();
 
-export default async function CourseDetailPage({ params }) {
-  const resolvedParams = await params;
-  const slug = Array.isArray(resolvedParams.slug)
-    ? resolvedParams.slug[0]
-    : resolvedParams.slug;
-  const course = getCourse(slug);
+  const resolvedSlug = useMemo(() => {
+    if (!routeParams?.slug) return "";
+    return Array.isArray(routeParams.slug)
+      ? routeParams.slug[0]
+      : routeParams.slug;
+  }, [routeParams]);
 
-  if (!course) {
-    notFound();
+  const [course, setCourse] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMissing, setIsMissing] = useState(false);
+
+  useEffect(() => {
+    async function loadCourse() {
+      if (!resolvedSlug) {
+        setIsMissing(true);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/courses/${resolvedSlug}`, {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.success) {
+          setIsMissing(true);
+          return;
+        }
+
+        setCourse(payload.data);
+      } catch {
+        setIsMissing(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadCourse();
+  }, [resolvedSlug]);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+        Loading course details...
+      </div>
+    );
+  }
+
+  if (isMissing || !course) {
+    return (
+      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6">
+        <h1 className="text-2xl font-semibold text-slate-900">
+          Course not found
+        </h1>
+        <p className="text-slate-600">
+          This course may have been removed or the link is invalid.
+        </p>
+        <Link
+          href="/courses"
+          className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-teal-500"
+        >
+          Back to courses
+        </Link>
+      </div>
+    );
   }
 
   const stats = [
