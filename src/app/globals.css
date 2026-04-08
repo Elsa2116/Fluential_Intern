@@ -40,3 +40,18 @@ a {
 ::selection {
   background: rgba(20, 184, 166, 0.2);
 }
+
+.page-transition {
+  animation: page-enter 280ms ease-out;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
